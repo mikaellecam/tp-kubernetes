@@ -3,6 +3,13 @@
 > Module Architecture — INSA — H. Tondeur 2026.
 > Réalisé sur Windows 11 + WSL2 Ubuntu 24.04 + Docker Desktop.
 
+### Groupe: 
+
+- Mikael LE CAM
+- Antonin RIQUART
+- Gregoire LEGRAND
+- Jonathan ISAMBOURG
+
 ## Contenu du dépôt
 
 ```
