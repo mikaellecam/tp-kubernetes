@@ -4,13 +4,10 @@ pod/rogue created
 === Wait for rogue pod ready (max 30s) ===
 attempt=1 state=Pending
 attempt=2 state=Pending
-attempt=3 state=Pending
-attempt=4 state=Pending
-attempt=5 state=Pending
-attempt=6 state=Running
+attempt=3 state=Running
 
 === curl from rogue pod (expected: connection-refused or 403) ===
-http=403 time=0.002800s
+http=403 time=0.002645s
 
 === verbose: show why ===
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
@@ -29,7 +26,7 @@ http=403 time=0.002800s
 * Request completely sent off
 < HTTP/1.1 403 Forbidden
 < content-length: 0
-< date: Sat, 02 May 2026 17:00:14 GMT
+< date: Sat, 02 May 2026 17:09:46 GMT
 < 
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
 * Connection #0 to host sample-api.labotrack.svc.cluster.local left intact

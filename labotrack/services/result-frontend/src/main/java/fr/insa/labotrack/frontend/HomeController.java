@@ -1,17 +1,22 @@
 package fr.insa.labotrack.frontend;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Controller
 public class HomeController {
+
+    private static final URI HOME = URI.create("/");
 
     private final BackendClient backend;
 
@@ -38,16 +43,16 @@ public class HomeController {
     }
 
     @PostMapping("/samples")
-    public String createSample(@RequestParam String patient,
-                               @RequestParam String examType,
-                               @RequestParam String sampleType) {
+    public ResponseEntity<Void> createSample(@RequestParam String patient,
+                                             @RequestParam String examType,
+                                             @RequestParam String sampleType) {
         backend.createSample(patient, examType, sampleType);
-        return "redirect:/";
+        return ResponseEntity.status(HttpStatus.SEE_OTHER).location(HOME).build();
     }
 
     @PostMapping("/analyze")
-    public String analyze(@RequestParam Long id) {
+    public ResponseEntity<Void> analyze(@RequestParam Long id) {
         backend.analyze(id);
-        return "redirect:/";
+        return ResponseEntity.status(HttpStatus.SEE_OTHER).location(HOME).build();
     }
 }
