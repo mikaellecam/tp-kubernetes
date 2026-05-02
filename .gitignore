@@ -15,7 +15,5 @@ target/
 
 # Logs
 *.log
-!step1/monservice/proof-test-output.log
 !labotrack/docs/smoke-test.log
 !labotrack/docs/zero-trust.log
-!step1/questions/proof-output.log

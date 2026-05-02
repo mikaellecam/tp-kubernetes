@@ -3,11 +3,6 @@
 > Module Architecture — INSA — H. Tondeur 2026.
 > Réalisé sur Windows 11 + WSL2 Ubuntu 24.04 + Docker Desktop.
 
-## Équipe
-
-- **Mikael Lecam** — `mikael.california@gmail.com`
-<!-- Ajouter ici les autres membres de l'équipe le cas échéant. -->
-
 ## Contenu du dépôt
 
 ```
@@ -61,7 +56,3 @@ bash labotrack/runbook.sh           # déploie tout sur Minikube
 ## Étape 2 — LaboTrack
 
 Le dossier `labotrack/` implémente le « Mini-Système de Suivi des Analyses de Laboratoire » sous forme de 3 microservices Spring Boot maillés par Linkerd. Tous les détails techniques se trouvent dans `labotrack/docs/manuel-technique.md` et `labotrack/docs/architecture.md`.
-
-## Livraison
-
-Conformément à l'énoncé, le code est livré ici (Git). Pour la remise effective, le lien sera transmis par mail à `tondeur.herve@yahoo.fr` et `herve.tondeur@uphf.fr`.
