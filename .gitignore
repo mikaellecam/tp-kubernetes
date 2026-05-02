@@ -1,4 +1,21 @@
 document_tp_kubernetes.md
 tp_kubernetes (Services Mesh) 2026.md
 
-.idea
+.idea/
+
+# Internal Claude Code helper scripts (used during bootstrap, not part of the deliverable)
+.claude/
+
+# Maven build output
+target/
+*.iml
+
+# Spring Boot dev artifacts
+**/.mvn/wrapper/*.jar
+
+# Logs
+*.log
+!step1/monservice/proof-test-output.log
+!labotrack/docs/smoke-test.log
+!labotrack/docs/zero-trust.log
+!step1/questions/proof-output.log

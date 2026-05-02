@@ -1,0 +1,62 @@
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: sample-api.labotrack.svc.cluster.local
+  namespace: labotrack
+spec:
+  routes:
+    - name: list-samples
+      condition:
+        method: GET
+        pathRegex: /samples
+      isRetryable: true
+      timeout: 3s
+    - name: get-sample
+      condition:
+        method: GET
+        pathRegex: /samples/[0-9]+
+      isRetryable: true
+      timeout: 3s
+    - name: create-sample
+      condition:
+        method: POST
+        pathRegex: /samples
+      timeout: 5s
+    - name: update-status
+      condition:
+        method: PATCH
+        pathRegex: /samples/[0-9]+/status
+      timeout: 3s
+  retryBudget:
+    retryRatio: 0.2
+    minRetriesPerSecond: 10
+    ttl: 10s
+---
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: analysis-api.labotrack.svc.cluster.local
+  namespace: labotrack
+spec:
+  routes:
+    - name: analyze
+      condition:
+        method: POST
+        pathRegex: /analyze/[0-9]+
+      timeout: 8s
+    - name: get-result
+      condition:
+        method: GET
+        pathRegex: /results/[0-9]+
+      isRetryable: true
+      timeout: 3s
+    - name: list-results
+      condition:
+        method: GET
+        pathRegex: /results
+      isRetryable: true
+      timeout: 3s
+  retryBudget:
+    retryRatio: 0.2
+    minRetriesPerSecond: 10
+    ttl: 10s

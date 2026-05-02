@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: result-frontend
+  namespace: labotrack
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result-frontend
+  namespace: labotrack
+  labels:
+    app: result-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: result-frontend
+  template:
+    metadata:
+      labels:
+        app: result-frontend
+    spec:
+      serviceAccountName: result-frontend
+      containers:
+        - name: result-frontend
+          image: localhost:5000/result-frontend:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: SAMPLE_API_BASE_URL
+              value: http://sample-api.labotrack.svc.cluster.local:8080
+            - name: ANALYSIS_API_BASE_URL
+              value: http://analysis-api.labotrack.svc.cluster.local:8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: result-frontend
+  namespace: labotrack
+  labels:
+    app: result-frontend
+spec:
+  selector:
+    app: result-frontend
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080

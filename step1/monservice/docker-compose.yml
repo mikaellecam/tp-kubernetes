@@ -1,0 +1,10 @@
+services:
+  monservice:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    image: monservice:simple
+    container_name: monservice
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>LaboTrack — Sample Tracker</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; max-width: 980px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+        h1 { border-bottom: 3px solid #2c5aa0; padding-bottom: .3rem; }
+        h2 { margin-top: 2.5rem; color: #2c5aa0; }
+        form { margin: 1rem 0; padding: 1rem; background: #f4f6fa; border-radius: 6px; }
+        label { display: inline-block; min-width: 110px; font-weight: 600; }
+        input[type=text] { padding: .35rem .5rem; border: 1px solid #aab; border-radius: 4px; }
+        button { padding: .4rem .9rem; background: #2c5aa0; color: white; border: 0; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1f4174; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: .5rem .7rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #eef2f7; }
+        .status-REGISTERED { color: #b88500; font-weight: 600; }
+        .status-ANALYZING { color: #2c5aa0; font-weight: 600; }
+        .status-VALIDATED { color: #2a7a2a; font-weight: 600; }
+        .interpretation-low { color: #b95400; }
+        .interpretation-high { color: #b91c1c; }
+        .interpretation-normal { color: #2a7a2a; }
+    </style>
+</head>
+<body>
+    <h1>LaboTrack — Mini-LIS Sample Tracker</h1>
+    <p>3 microservices &middot; <code>result-frontend</code> &rarr; (<code>sample-api</code>, <code>analysis-api</code>) &middot; meshed with Linkerd.</p>
+
+    <h2>Register a sample</h2>
+    <form th:action="@{/samples}" method="post">
+        <p><label for="patient">Patient</label><input type="text" id="patient" name="patient" required></p>
+        <p><label for="examType">Exam type</label><input type="text" id="examType" name="examType" value="glycemia" required></p>
+        <p><label for="sampleType">Sample type</label><input type="text" id="sampleType" name="sampleType" value="blood" required></p>
+        <p><button type="submit">Register</button></p>
+    </form>
+
+    <h2>Samples &amp; results</h2>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Patient</th><th>Exam</th><th>Status</th><th>Result</th><th>Interpretation</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            <tr th:each="s : ${samples}">
+                <td th:text="${s.id}">1</td>
+                <td th:text="${s.patient}">Doe</td>
+                <td th:text="${s.examType}">glycemia</td>
+                <td><span th:class="'status-' + ${s.status}" th:text="${s.status}">REGISTERED</span></td>
+                <td>
+                    <span th:if="${s.result != null}"
+                          th:text="${s.result.value} + ' ' + ${s.result.unit}">0.86 g/L</span>
+                    <span th:if="${s.result == null}">&mdash;</span>
+                </td>
+                <td>
+                    <span th:if="${s.result != null}"
+                          th:class="'interpretation-' + ${s.result.interpretation}"
+                          th:text="${s.result.interpretation}">normal</span>
+                </td>
+                <td>
+                    <form th:if="${s.result == null}" th:action="@{/analyze}" method="post" style="margin:0;padding:0;background:none;display:inline">
+                        <input type="hidden" name="id" th:value="${s.id}">
+                        <button type="submit">Analyze</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(samples)}">
+                <td colspan="7" style="text-align:center;color:#888">No samples yet — register one above.</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

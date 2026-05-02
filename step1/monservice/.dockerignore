@@ -1,0 +1,7 @@
+# Note: target/ is intentionally NOT excluded so Dockerfile.simple can copy
+# the locally-built fat-jar. The multi-stage Dockerfile doesn't COPY target/,
+# so the marginal build-context cost is negligible.
+.idea/
+*.iml
+.git/
+.mvn/

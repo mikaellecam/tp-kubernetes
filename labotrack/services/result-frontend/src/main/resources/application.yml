@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: result-frontend
+  thymeleaf:
+    cache: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+labotrack:
+  sample-api:
+    base-url: ${SAMPLE_API_BASE_URL:http://sample-api:8080}
+  analysis-api:
+    base-url: ${ANALYSIS_API_BASE_URL:http://analysis-api:8080}

@@ -1,0 +1,55 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: analysis-api
+  profiles:
+    default: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+labotrack:
+  sample-api:
+    base-url: ${SAMPLE_API_BASE_URL:http://sample-api:8080}
+
+analysis:
+  simulated-latency-ms: ${ANALYSIS_SIMULATED_LATENCY_MS:0}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:h2:mem:analysis;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/analysis}
+    username: ${SPRING_DATASOURCE_USERNAME:labotrack}
+    password: ${SPRING_DATASOURCE_PASSWORD:labotrack}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

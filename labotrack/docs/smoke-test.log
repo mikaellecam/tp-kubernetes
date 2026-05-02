@@ -1,0 +1,172 @@
+
+################################################################
+##  Cluster + mesh state
+################################################################
+
+NAME                               READY   STATUS    RESTARTS   AGE     IP            NODE       NOMINATED NODE   READINESS GATES
+analysis-api-75f6684b8d-bwtmr      2/2     Running   0          9m54s   10.244.0.16   minikube   <none>           <none>
+analysis-api-75f6684b8d-fzvm2      2/2     Running   0          9m54s   10.244.0.14   minikube   <none>           <none>
+analysis-api-75f6684b8d-tx5kr      2/2     Running   0          9m54s   10.244.0.15   minikube   <none>           <none>
+postgres-0                         2/2     Running   0          10m     10.244.0.11   minikube   <none>           <none>
+result-frontend-85b8f94b7f-qvcw5   2/2     Running   0          9m54s   10.244.0.17   minikube   <none>           <none>
+sample-api-c48494c7-fb784          2/2     Running   0          9m55s   10.244.0.12   minikube   <none>           <none>
+sample-api-c48494c7-x74kd          2/2     Running   0          9m55s   10.244.0.13   minikube   <none>           <none>
+
+NAME              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+analysis-api      ClusterIP   10.107.47.164    <none>        8080/TCP         9m54s
+postgres          ClusterIP   None             <none>        5432/TCP         10m
+result-frontend   NodePort    10.103.195.128   <none>        8080:30080/TCP   9m54s
+sample-api        ClusterIP   10.102.54.200    <none>        8080/TCP         9m55s
+
+################################################################
+##  Linkerd checks
+################################################################
+
+√ viz extension self-check
+
+Status check results are √
+√ viz extension self-check
+
+Status check results are √
+
+################################################################
+##  AuthorizationPolicy / Servers / Authentications
+################################################################
+
+NAME                           AGE
+analysis-api-allow-frontend    9m59s
+result-frontend-allow-public   9m59s
+sample-api-allow-analysis      8m31s
+sample-api-allow-frontend      8m31s
+
+NAME                                       PORT   PROTOCOL   ACCESS POLICY
+server.policy.linkerd.io/analysis-api      http   HTTP/1     deny
+server.policy.linkerd.io/result-frontend   http   HTTP/1     deny
+server.policy.linkerd.io/sample-api        http   HTTP/1     deny
+
+NAME                                                               AGE
+meshtlsauthentication.policy.linkerd.io/analysis-api-identity      9m59s
+meshtlsauthentication.policy.linkerd.io/result-frontend-identity   9m59s
+
+NAME                                                   AGE
+networkauthentication.policy.linkerd.io/all-networks   9m59s
+
+################################################################
+##  Port-forward frontend to http://127.0.0.1:18080
+################################################################
+
+
+################################################################
+##  GET /  (homepage)
+################################################################
+
+http=200 time=2.988948s
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LaboTrack — Sample Tracker</title>
+    <style>
+        body { font-family: system-ui, -apple-system, Segoe UI, sans-serif; max-width: 980px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+        h1 { border-bottom: 3px solid #2c5aa0; padding-bottom: .3rem; }
+        h2 { margin-top: 2.5rem; color: #2c5aa0; }
+        form { margin: 1rem 0; padding: 1rem; background: #f4f6fa; border-radius: 6px; }
+        label { display: inline-block; min-width: 110px; font-weight: 600; }
+        input[type=text] { padding: .35rem .5rem; border: 1px solid #aab; border-radius: 4px; }
+        button { padding: .4rem .9rem; background: #2c5aa0; color: white; border: 0; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1f4174; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: .5rem .7rem; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #eef2f7; }
+        .status-REGISTERED { color: #b88500; font-weight: 600; }
+        .status-ANALYZING { color: #2c5aa0; font-weight: 600; }
+        .status-VALIDATED { color: #2a7a2a; font-weight: 600; }
+        .interpretation-low { color: #b95400; }
+        .interpretation-high { color: #b91c1c; }
+        .interpretation-normal { color: #2a7a2a; }
+    </style>
+</head>
+
+
+################################################################
+##  POST /samples (4 patients) via frontend
+################################################################
+
+patient=dupont http=405 time=1.069795s
+patient=martin http=405 time=0.050507s
+patient=curie http=405 time=0.017171s
+patient=pasteur http=405 time=0.016473s
+
+--- frontend list (should show 4 samples REGISTERED) ---
+<td>1</td>
+<td>dupont</td>
+<td>glycemia</td>
+<td>2</td>
+<td>martin</td>
+<td>glycemia</td>
+<td>3</td>
+<td>curie</td>
+<td>glycemia</td>
+<td>4</td>
+<td>pasteur</td>
+<td>glycemia</td>
+
+
+################################################################
+##  POST /analyze (samples 1..4) via frontend
+################################################################
+
+analyze id=1 http=405 time=2.396334s
+analyze id=2 http=405 time=2.361204s
+analyze id=3 http=405 time=0.342390s
+analyze id=4 http=405 time=2.493049s
+
+--- frontend list (should show VALIDATED + interpretation) ---
+<td>1</td>
+<td>dupont</td>
+<td>glycemia</td>
+class="status-VALIDATED"
+class="interpretation-high"
+<td>2</td>
+<td>martin</td>
+<td>glycemia</td>
+class="status-VALIDATED"
+class="interpretation-low"
+<td>3</td>
+<td>curie</td>
+<td>glycemia</td>
+class="status-VALIDATED"
+class="interpretation-normal"
+<td>4</td>
+<td>pasteur</td>
+<td>glycemia</td>
+class="status-VALIDATED"
+class="interpretation-normal"
+
+################################################################
+##  mTLS edges (after smoke flow)
+################################################################
+
+SRC               DST               SRC_NS        DST_NS      SECURED
+analysis-api      sample-api        labotrack     labotrack   √      
+result-frontend   analysis-api      labotrack     labotrack   √      
+result-frontend   sample-api        labotrack     labotrack   √      
+prometheus        analysis-api      linkerd-viz   labotrack   √      
+prometheus        result-frontend   linkerd-viz   labotrack   √      
+prometheus        sample-api        linkerd-viz   labotrack   √      
+
+################################################################
+##  Linkerd Viz stat
+################################################################
+
+NAME              MESHED   SUCCESS      RPS   LATENCY_P50   LATENCY_P95   LATENCY_P99   TCP_CONN
+analysis-api         3/3   100.00%   1.7rps           1ms           3ms           3ms         12
+result-frontend      1/1   100.00%   0.6rps           1ms           2ms           2ms          2
+sample-api           2/2   100.00%   1.1rps           1ms           3ms           3ms          8
+
+################################################################
+##  Direct unauthorized call must be denied (zero-trust)
+################################################################
+
+--- curl-pod with default SA tries sample-api (expected 403) ---

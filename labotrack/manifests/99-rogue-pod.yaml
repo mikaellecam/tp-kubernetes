@@ -1,0 +1,23 @@
+# Optional rogue pod used to demonstrate that the AuthorizationPolicy denies
+# unidentified callers. Apply manually for the demo only:
+#
+#   kubectl apply -f labotrack/manifests/99-rogue-pod.yaml
+#   kubectl -n rogue exec -it rogue -- curl -s http://sample-api.labotrack.svc.cluster.local:8080/samples
+#
+# Expected: HTTP 403 (denied by AuthorizationPolicy).
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rogue
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rogue
+  namespace: rogue
+spec:
+  containers:
+    - name: curl
+      image: curlimages/curl:8.10.1
+      command: ["sleep", "3600"]

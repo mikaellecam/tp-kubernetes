@@ -1,0 +1,136 @@
+# Zero-Trust authorization policies for the LaboTrack mesh.
+# Each backend `Server` requires identity-based callers via MeshTLSAuthentication.
+#
+# Allowed call graph:
+#   * → result-frontend  (public; allowed by Server with networkAuthn 0.0.0.0/0 — exposed via NodePort)
+#   result-frontend → sample-api
+#   result-frontend → analysis-api
+#   analysis-api    → sample-api
+# Anything else inside the cluster is denied.
+
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  name: sample-api
+  namespace: labotrack
+spec:
+  podSelector:
+    matchLabels:
+      app: sample-api
+  port: http
+  proxyProtocol: HTTP/1
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  name: analysis-api
+  namespace: labotrack
+spec:
+  podSelector:
+    matchLabels:
+      app: analysis-api
+  port: http
+  proxyProtocol: HTTP/1
+---
+apiVersion: policy.linkerd.io/v1beta1
+kind: Server
+metadata:
+  name: result-frontend
+  namespace: labotrack
+spec:
+  podSelector:
+    matchLabels:
+      app: result-frontend
+  port: http
+  proxyProtocol: HTTP/1
+---
+# Identity authentications for the in-mesh callers.
+apiVersion: policy.linkerd.io/v1alpha1
+kind: MeshTLSAuthentication
+metadata:
+  name: result-frontend-identity
+  namespace: labotrack
+spec:
+  identities:
+    - "result-frontend.labotrack.serviceaccount.identity.linkerd.cluster.local"
+---
+apiVersion: policy.linkerd.io/v1alpha1
+kind: MeshTLSAuthentication
+metadata:
+  name: analysis-api-identity
+  namespace: labotrack
+spec:
+  identities:
+    - "analysis-api.labotrack.serviceaccount.identity.linkerd.cluster.local"
+---
+# Anyone outside the cluster (NodePort hit) reaches the frontend via this network authn.
+apiVersion: policy.linkerd.io/v1alpha1
+kind: NetworkAuthentication
+metadata:
+  name: all-networks
+  namespace: labotrack
+spec:
+  networks:
+    - cidr: 0.0.0.0/0
+    - cidr: ::/0
+---
+# Authorization policies binding callers to Servers.
+apiVersion: policy.linkerd.io/v1alpha1
+kind: AuthorizationPolicy
+metadata:
+  name: sample-api-allow-frontend
+  namespace: labotrack
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: sample-api
+  requiredAuthenticationRefs:
+    - group: policy.linkerd.io
+      kind: MeshTLSAuthentication
+      name: result-frontend-identity
+---
+apiVersion: policy.linkerd.io/v1alpha1
+kind: AuthorizationPolicy
+metadata:
+  name: sample-api-allow-analysis
+  namespace: labotrack
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: sample-api
+  requiredAuthenticationRefs:
+    - group: policy.linkerd.io
+      kind: MeshTLSAuthentication
+      name: analysis-api-identity
+---
+apiVersion: policy.linkerd.io/v1alpha1
+kind: AuthorizationPolicy
+metadata:
+  name: analysis-api-allow-frontend
+  namespace: labotrack
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: analysis-api
+  requiredAuthenticationRefs:
+    - group: policy.linkerd.io
+      kind: MeshTLSAuthentication
+      name: result-frontend-identity
+---
+apiVersion: policy.linkerd.io/v1alpha1
+kind: AuthorizationPolicy
+metadata:
+  name: result-frontend-allow-public
+  namespace: labotrack
+spec:
+  targetRef:
+    group: policy.linkerd.io
+    kind: Server
+    name: result-frontend
+  requiredAuthenticationRefs:
+    - group: policy.linkerd.io
+      kind: NetworkAuthentication
+      name: all-networks
