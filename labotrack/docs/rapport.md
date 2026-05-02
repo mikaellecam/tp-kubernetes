@@ -127,14 +127,11 @@ Le multi-stage isole l'outillage de compilation dans une image éphémère et ne
 
 ### 4.1 Architecture
 
-3 microservices (`sample-api`, `analysis-api`, `result-frontend`) + une base PostgreSQL partagée (deux schémas), tous déployés dans le namespace `labotrack` annoté `linkerd.io/inject=enabled` pour bénéficier automatiquement du sidecar Linkerd. Diagramme et description détaillée : `architecture.md`.
+3 microservices (`sample-api`, `analysis-api`, `result-frontend`) + une base PostgreSQL partagée (deux schémas), tous déployés dans le namespace `labotrack` annoté `linkerd.io/inject=enabled` pour bénéficier automatiquement du sidecar Linkerd.
 
-```
-client ── NodePort 30080 ──▶ result-frontend ──▶ sample-api
-                                       │              │
-                                       │              ▼
-                                       └──▶ analysis-api ──▶ Postgres (samples + analysis)
-```
+![Architecture LaboTrack](screenshots/architecture.png)
+
+Description détaillée et diagramme source mermaid : `architecture.md`.
 
 ### 4.2 Cycle de vie type d'un échantillon
 
@@ -227,6 +224,22 @@ Le script idempotent `labotrack/runbook.sh` enchaîne en une commande :
 4. La ligne affiche le résultat (valeur g/L), l'interprétation (`low/normal/high`) et le statut `VALIDATED`.
 
 Le log du smoke test automatique est dans `labotrack/docs/smoke-test.log`.
+
+#### Frontend après 4 enregistrements + analyses
+
+![Frontend avec 4 échantillons validés](screenshots/frontend-with-samples.png)
+
+#### Linkerd Viz — namespace `labotrack`
+
+Le dashboard Linkerd montre la topologie automatique des appels (sample-api ⇄ result-frontend ⇄ analysis-api), le maillage 100 % des pods, et le taux de succès à 100 % sur tous les déploiements.
+
+![Linkerd Viz — namespace LaboTrack](screenshots/linkerd-viz-namespace.png)
+
+#### Linkerd Viz — métriques HTTP et TCP par déploiement
+
+![Linkerd Viz — métriques par déploiement](screenshots/linkerd-viz-deployments.png)
+
+p50/p95/p99 latency à 1-2 ms, RPS stable, 100 % de succès sur HTTP, et compteur de connexions TCP visible (utile pour diagnostiquer le pool sidecar).
 
 ---
 
